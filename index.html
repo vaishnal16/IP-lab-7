@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Catalog</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Product Catalog</h1>
+        </header>
+
+        <section class="search-section">
+            <h2>Search Products</h2>
+            <input type="text" id="search-name" placeholder="Search by name" />
+            <input type="text" id="search-category" placeholder="Search by category" />
+            <input type="number" id="min-price" placeholder="Min Price" />
+            <input type="number" id="max-price" placeholder="Max Price" />
+            <button id="search-btn">Search</button>
+        </section>
+
+        <section class="product-list">
+            <h2>All Products</h2>
+            <div id="products-container"></div>
+        </section>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000';
+
+        // Fetch all products and render them
+        async function fetchAllProducts() {
+            const response = await fetch(`${API_URL}/products`);
+            const products = await response.json();
+            renderProducts(products);
+        }
+
+        // Search products based on input values
+        async function searchProducts() {
+            const name = document.getElementById('search-name').value;
+            const category = document.getElementById('search-category').value;
+            const minPrice = document.getElementById('min-price').value;
+            const maxPrice = document.getElementById('max-price').value;
+
+            const queryParams = new URLSearchParams();
+
+            if (name) queryParams.append('name', name);
+            if (category) queryParams.append('category', category);
+            if (minPrice) queryParams.append('minPrice', minPrice);
+            if (maxPrice) queryParams.append('maxPrice', maxPrice);
+
+            const response = await fetch(`${API_URL}/search?${queryParams}`);
+            const products = await response.json();
+            renderProducts(products);
+        }
+
+        // Render products on the page
+        function renderProducts(products) {
+            const productsContainer = document.getElementById('products-container');
+            productsContainer.innerHTML = '';
+
+            if (products.length === 0) {
+                productsContainer.innerHTML = '<p>No products found</p>';
+                return;
+            }
+
+            products.forEach(product => {
+                const productElement = document.createElement('div');
+                productElement.classList.add('product');
+
+                productElement.innerHTML = `
+                    <h3>${product.name}</h3>
+                    <p>Category: ${product.category}</p>
+                    <p>Price: $${product.price}</p>
+                `;
+
+                productsContainer.appendChild(productElement);
+            });
+        }
+
+        // Event listener for search button
+        document.getElementById('search-btn').addEventListener('click', searchProducts);
+
+        // Fetch all products on page load
+        fetchAllProducts();
+    </script>
+</body>
+</html>
